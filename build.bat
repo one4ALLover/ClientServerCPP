@@ -21,6 +21,23 @@ call "%VSROOT%\Common7\Tools\VsDevCmd.bat" -arch=x64
 
 if errorlevel 1 exit /b 1
 
+
+REM Build server
 cl /EHsc /Zi /std:c++17 server.cpp /Fe:server.exe /link Ws2_32.lib
 
-exit /b %errorlevel%
+if errorlevel 1 (
+    echo Server build failed.
+    exit /b 1
+)
+
+REM Build client
+cl /EHsc /Zi /std:c++17 client.cpp /Fe:client.exe /link Ws2_32.lib
+
+if errorlevel 1 (
+    echo Client build failed.
+    exit /b 1
+)
+
+echo Server and client built successfully.
+exit /b 0
+
