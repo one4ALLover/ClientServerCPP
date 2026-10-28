@@ -60,12 +60,24 @@ WSADATA wsaData;
     // Привязка сокета к адресу
     if (bind(serverSocket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(serverAddress)) == SOCKET_ERROR)
     {
-        std::cerr << "bind failed: " << WSAGetLastError() << std::endl;
+        std::cerr << "bind failed with: " << WSAGetLastError() << std::endl;
         closesocket(serverSocket);
         WSACleanup();
         return 1;
     }
     std::cout << "Socket bound to address successfully." << std::endl;
+
+    // Прослушивание входящих соединений
+    if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR)
+    {
+        std::cerr << "listen failed with: " << WSAGetLastError() << std::endl;
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    std::cout << "Server is listening for incoming connections..." << std::endl;
+
 
     closesocket(serverSocket);
     WSACleanup();
