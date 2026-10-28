@@ -78,7 +78,21 @@ WSADATA wsaData;
 
     std::cout << "Server is listening for incoming connections..." << std::endl;
 
+    // Ожидание входящего соединения
+    SOCKET clientSocket = accept(serverSocket, nullptr, nullptr);
 
+    if (clientSocket == INVALID_SOCKET)
+    {
+        std::cerr << "accept failed with: " << WSAGetLastError() << std::endl;
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    std::cout << "Client connected successfully." << std::endl;
+
+
+    closesocket(clientSocket);
     closesocket(serverSocket);
     WSACleanup();
     return 0;
