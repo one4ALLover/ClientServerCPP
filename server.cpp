@@ -2,6 +2,8 @@
 
 #include <winsock2.h>
 
+#include <ws2tcpip.h>
+
 int main()
 {
 WSADATA wsaData;
@@ -29,6 +31,41 @@ WSADATA wsaData;
         return 1;
     }
     std::cout << "Socket created successfully." << std::endl;
+
+    // Настройка адреса сервера
+    sockaddr_in serverAddress{}; // Структура для хранения адреса сервера
+
+    serverAddress.sin_family = AF_INET; // Семейство адресов (IPv4)
+    serverAddress.sin_port = htons(8080); // Порт сервера
+    
+    // Преобразование IP-адреса из текстового формата в бинарный
+    int AdrResult = InetPtonA(serverAddress.sin_family, "127.0.0.1", &serverAddress.sin_addr); // Преобразование IP-адреса из текстового формата в бинарный
+
+    // Проверка на успешность преобразования IP-адреса
+    if (AdrResult == 0)
+    {
+        std::cerr << "Invalid IP address format." << std::endl;
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+    else if (AdrResult < 0)
+    {
+        std::cerr << "InetPton failed: " << WSAGetLastError() << std::endl;
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    // Привязка сокета к адресу
+    if (bind(serverSocket, reinterpret_cast<sockaddr*>(&serverAddress), sizeof(serverAddress)) == SOCKET_ERROR)
+    {
+        std::cerr << "bind failed: " << WSAGetLastError() << std::endl;
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
+    std::cout << "Socket bound to address successfully." << std::endl;
 
     closesocket(serverSocket);
     WSACleanup();
