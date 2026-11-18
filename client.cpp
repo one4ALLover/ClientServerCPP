@@ -3,6 +3,7 @@
 #include <winsock2.h>
 
 #include <ws2tcpip.h>
+#include <string>
 
 int main()
 {
@@ -54,7 +55,38 @@ int main()
         WSACleanup();
         return 1;
     }
+    std::cout << "Connected to server." << std::endl;
 
+    //std::string message = "Hello, Server!\n";
+
+    while (true) {
+            std::string message;
+            std::cout << "Enter message to send (or 'ex' to quit): ";
+            
+            if (!std::getline(std::cin, message)) {
+                std::cerr << "Error reading input." << std::endl;
+                break;
+            }
+
+            if (message == "ex") {
+                break;
+            }
+
+            if (message.empty()) {
+                std::cerr << "Message cannot be empty." << std::endl;
+                continue;
+            }
+
+            message += "\n";
+
+        int bytesSent = send(clientSocket, message.c_str(), static_cast<int>(message.size()), 0);
+
+        if (bytesSent == SOCKET_ERROR) {
+            std::cerr << "send failed with error: " << WSAGetLastError() << std::endl;
+            closesocket(clientSocket);
+            WSACleanup();
+            return 1; }
+        }
      closesocket(clientSocket);
      WSACleanup();
      return 0;

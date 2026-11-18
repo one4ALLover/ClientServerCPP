@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <string>
 #include <winsock2.h>
 
 #include <ws2tcpip.h>
@@ -90,8 +90,56 @@ WSADATA wsaData;
     }
 
     std::cout << "Client connected successfully." << std::endl;
+ 
+    char mesBuf[1024] = {0}; // Буфер для приема данных
+    std::string output; // Строка для хранения полученного сообщения
+    
+    while(true)
+    {
+    
+    int bytesReceived = recv(clientSocket, mesBuf, sizeof(mesBuf), 0); //число полученных байт
+    
+    //ошибка сокета
+    if (bytesReceived == SOCKET_ERROR)
+    {
+        std::cerr << "recv failed with: " << WSAGetLastError() << std::endl;
+        closesocket(clientSocket);
+        closesocket(serverSocket);
+        WSACleanup();
+        return 1;
+    }
 
+    //отключение клиента
+    else if (bytesReceived == 0)
+    {
+        std::cout << "Client disconnected." << std::endl;
+        break;
+    }
 
+    //основной цикл сообщения
+    else
+    {
+        for (int i = 0; i < bytesReceived; i++) 
+        {
+            if (mesBuf[i] != '\n')
+            {
+                output += mesBuf[i];
+            } 
+            
+            else 
+            {
+                std::cout << "Received message from client: " << output << '\n';
+                output.clear();
+            }
+        }
+    }
+}
+
+    if (!output.empty())
+        {
+            std::cerr << "Warning: incomplete message received." << std::endl;
+        }
+    
     closesocket(clientSocket);
     closesocket(serverSocket);
     WSACleanup();
